@@ -9,8 +9,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/albarin/t2s/pkg/notifications"
+	"github.com/albarin/t2s/pkg/slackapi"
 	"github.com/albarin/t2s/pkg/slackoauth"
 	"github.com/albarin/t2s/pkg/slackrepo"
+	subscriptionsrepo "github.com/albarin/t2s/pkg/subscriptionrepo"
 	"github.com/albarin/t2s/pkg/twitchapi"
 	"github.com/albarin/t2s/pkg/twitchoauth"
 	"github.com/albarin/t2s/pkg/twitchrepo"
@@ -19,6 +22,10 @@ import (
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 )
+
+// TODO:
+// - what happens when trying to install the app for a user that already has it installed?
+// - consider to pass the teamID in the state (along with the slackUserID) to avoid a db query
 
 func main() {
 	cfg := generateConfig()
@@ -30,6 +37,9 @@ func main() {
 	}
 	defer db.Close()
 
+	httpClient := http.DefaultClient
+
+	slackAPI := slackapi.New(httpClient, "https://slack.com/api")
 	slackRepo := slackrepo.New(db)
 	slackOauthConfig := &oauth2.Config{
 		ClientID:     cfg.slack.clientID,
@@ -41,8 +51,6 @@ func main() {
 		},
 		RedirectURL: cfg.slack.redirectURL,
 	}
-
-	httpClient := http.DefaultClient
 
 	twitchAPI := twitchapi.New(httpClient, "https://api.twitch.tv/helix", cfg.twitch.clientID)
 	twitchRepo := twitchrepo.New(db)
@@ -57,6 +65,8 @@ func main() {
 		RedirectURL: cfg.twitch.redirectURL,
 	}
 
+	subscriptionsRepo := subscriptionsrepo.New(db)
+
 	app := application{
 		config: cfg,
 		logger: zerolog.New(os.Stderr).With().Timestamp().Logger(),
@@ -65,6 +75,9 @@ func main() {
 		twitchOauth: twitchoauth.New(twitchOauthConfig, twitchRepo, twitchAPI),
 
 		slackRepo: slackRepo,
+		subsRepo:  subscriptionsRepo,
+
+		notifications: notifications.New(slackAPI, slackRepo),
 	}
 
 	err = app.serve()

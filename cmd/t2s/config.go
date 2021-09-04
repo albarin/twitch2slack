@@ -14,6 +14,7 @@ type config struct {
 		clientSecret string
 		redirectURL  string
 		oauthURL     string
+		eventSecret  string
 	}
 	slack struct {
 		appID        string
@@ -34,6 +35,7 @@ func generateConfig() config {
 	cfg.twitch.clientID = os.Getenv("TWITCH_CLIENT_ID")
 	cfg.twitch.clientSecret = os.Getenv("TWITCH_CLIENT_SECRET")
 	cfg.twitch.redirectURL = os.Getenv("TWITCH_REDIRECT_URL")
+	cfg.twitch.eventSecret = os.Getenv("TWITCH_EVENT_SECRET")
 
 	cfg.slack.appID = os.Getenv("SLACK_APP_ID")
 	cfg.slack.clientID = os.Getenv("SLACK_CLIENT_ID")
