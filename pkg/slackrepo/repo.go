@@ -28,3 +28,21 @@ func (r *Repo) Create(auth *Auth) error {
 
 	return err
 }
+
+func (r *Repo) GetByUserID(userID string) (*Auth, error) {
+	var auth Auth
+
+	query := `
+		SELECT user_id, team_id, view_id, access_token
+		FROM slack_auths
+		WHERE user_id = $1
+	`
+
+	args := []interface{}{&auth.UserID, &auth.TeamID, &auth.ViewID, &auth.AccessToken}
+	err := r.db.QueryRow(query, userID).Scan(args...)
+	if err != nil {
+		return nil, err
+	}
+
+	return &auth, nil
+}
