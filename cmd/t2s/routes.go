@@ -9,5 +9,7 @@ import (
 func (app application) routes() http.Handler {
 	router := httprouter.New()
 
+	router.HandlerFunc(http.MethodGet, "/oauth/slack", app.handleSlackAuthorization())
+
 	return router
 }

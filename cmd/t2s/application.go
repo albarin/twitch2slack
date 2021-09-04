@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/albarin/t2s/pkg/slackoauth"
 	"github.com/rs/zerolog"
 )
 
 type application struct {
-	config config
-	logger zerolog.Logger
+	config     config
+	logger     zerolog.Logger
+	slackOauth *slackoauth.Service
 }
 
 func (app application) serve() error {

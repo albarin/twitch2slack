@@ -34,7 +34,6 @@ func generateConfig() config {
 	cfg.twitch.clientID = os.Getenv("TWITCH_CLIENT_ID")
 	cfg.twitch.clientSecret = os.Getenv("TWITCH_CLIENT_SECRET")
 	cfg.twitch.redirectURL = os.Getenv("TWITCH_REDIRECT_URL")
-	cfg.twitch.oauthURL = twitchOAuthURL(cfg.twitch.clientID, cfg.twitch.redirectURL)
 
 	cfg.slack.appID = os.Getenv("SLACK_APP_ID")
 	cfg.slack.clientID = os.Getenv("SLACK_CLIENT_ID")
