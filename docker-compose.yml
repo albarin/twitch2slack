@@ -1,0 +1,18 @@
+version: '3.1'
+
+services:
+  db:
+    image: postgres:13.4-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: twitch2slack
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+
+  migrations:
+    image: migrate/migrate
+    volumes:
+      - ./_migrations:/migrations
+    depends_on:
+      - db
