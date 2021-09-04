@@ -1,12 +1,7 @@
 package main
 
 import (
-	"errors"
 	"net/http"
-)
-
-var (
-	MissingCodeParamErr = errors.New("missing required code query parameter")
 )
 
 func (app application) handleSlackAuthorization() http.HandlerFunc {

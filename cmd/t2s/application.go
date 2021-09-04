@@ -5,13 +5,17 @@ import (
 	"net/http"
 
 	"github.com/albarin/t2s/pkg/slackoauth"
+	"github.com/albarin/t2s/pkg/slackrepo"
+	"github.com/albarin/t2s/pkg/twitchoauth"
 	"github.com/rs/zerolog"
 )
 
 type application struct {
-	config     config
-	logger     zerolog.Logger
-	slackOauth *slackoauth.Service
+	config      config
+	logger      zerolog.Logger
+	slackOauth  *slackoauth.Service
+	twitchOauth *twitchoauth.Service
+	slackRepo   *slackrepo.Repo
 }
 
 func (app application) serve() error {

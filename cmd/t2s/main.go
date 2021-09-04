@@ -3,12 +3,17 @@ package main
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/albarin/t2s/pkg/slackoauth"
 	"github.com/albarin/t2s/pkg/slackrepo"
+	"github.com/albarin/t2s/pkg/twitchapi"
+	"github.com/albarin/t2s/pkg/twitchoauth"
+	"github.com/albarin/t2s/pkg/twitchrepo"
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -37,11 +42,29 @@ func main() {
 		RedirectURL: cfg.slack.redirectURL,
 	}
 
+	httpClient := http.DefaultClient
+
+	twitchAPI := twitchapi.New(httpClient, "https://api.twitch.tv/helix", cfg.twitch.clientID)
+	twitchRepo := twitchrepo.New(db)
+	twitchOauthConfig := &oauth2.Config{
+		ClientID:     cfg.twitch.clientID,
+		ClientSecret: cfg.twitch.clientSecret,
+		Scopes:       []string{"user:read:subscriptions"},
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  "https://id.twitch.tv/oauth2/authorize",
+			TokenURL: "https://id.twitch.tv/oauth2/token",
+		},
+		RedirectURL: cfg.twitch.redirectURL,
+	}
+
 	app := application{
 		config: cfg,
 		logger: zerolog.New(os.Stderr).With().Timestamp().Logger(),
 
-		slackOauth: slackoauth.New(slackOauthConfig, slackRepo),
+		slackOauth:  slackoauth.New(slackOauthConfig, slackRepo),
+		twitchOauth: twitchoauth.New(twitchOauthConfig, twitchRepo, twitchAPI),
+
+		slackRepo: slackRepo,
 	}
 
 	err = app.serve()
@@ -78,4 +101,8 @@ func (app application) twitchOAuthURL(slackUserID string) string {
 	)
 
 	return replacer.Replace(url)
+}
+
+func (app application) slackHomeTabURL(slackTeamID string) string {
+	return fmt.Sprintf("slack://app?team=%s&id=%s&tab=home&state=foobar", slackTeamID, app.config.slack.appID)
 }
