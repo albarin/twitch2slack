@@ -32,3 +32,22 @@ func (r Repo) Create(auth *Auth) error {
 
 	return err
 }
+
+func (r Repo) GetBySlackUserID(slackUserID string) (*Auth, error) {
+	var auth Auth
+
+	query := `
+		SELECT ta.user_id, ta.access_token, ta.refresh_token, ta.slack_user_id
+		FROM twitch_auths ta
+		JOIN slack_auths sa on sa.user_id = ta.slack_user_id
+		WHERE sa.user_id = $1
+	`
+
+	args := []interface{}{&auth.UserID, &auth.AccessToken, &auth.RefreshToken, &auth.SlackUserID}
+	err := r.db.QueryRow(query, slackUserID).Scan(args...)
+	if err != nil {
+		return nil, err
+	}
+
+	return &auth, nil
+}

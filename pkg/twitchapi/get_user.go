@@ -15,6 +15,8 @@ type User struct {
 	ID string `json:"id"`
 }
 
+// TODO: use twitch helix lib
+
 func (api *API) GetUser(userToken string) (*User, error) {
 	url := fmt.Sprintf("%s/users", api.baseURL)
 	req, err := http.NewRequest(http.MethodGet, url, nil)

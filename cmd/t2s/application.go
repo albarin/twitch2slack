@@ -9,11 +9,14 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/albarin/t2s/pkg/apphome"
 	"github.com/albarin/t2s/pkg/notifications"
 	"github.com/albarin/t2s/pkg/slackoauth"
 	"github.com/albarin/t2s/pkg/slackrepo"
 	subscriptionsrepo "github.com/albarin/t2s/pkg/subscriptionrepo"
+	"github.com/albarin/t2s/pkg/twitchapi"
 	"github.com/albarin/t2s/pkg/twitchoauth"
+	"github.com/albarin/t2s/pkg/twitchrepo"
 	"github.com/rs/zerolog"
 )
 
@@ -25,6 +28,9 @@ type application struct {
 	slackRepo     *slackrepo.Repo
 	subsRepo      *subscriptionsrepo.Repo
 	notifications *notifications.Notifications
+	appHome       *apphome.AppHome
+	twitchAPI     *twitchapi.API
+	twitchRepo    *twitchrepo.Repo
 }
 
 func (app application) serve() error {

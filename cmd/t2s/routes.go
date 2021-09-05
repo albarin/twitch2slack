@@ -18,6 +18,7 @@ func (app application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/oauth/slack", app.handleSlackAuthorization())
 	router.HandlerFunc(http.MethodGet, "/oauth/twitch", app.handleTwitchAuthorization())
 
+	router.HandlerFunc(http.MethodPost, "/slack/events", app.handleSlackEvents())
 	router.HandlerFunc(http.MethodPost, "/twitch/events", app.handleTwitchEvent())
 
 	return router

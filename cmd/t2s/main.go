@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/albarin/t2s/pkg/apphome"
 	"github.com/albarin/t2s/pkg/notifications"
 	"github.com/albarin/t2s/pkg/slackapi"
 	"github.com/albarin/t2s/pkg/slackoauth"
@@ -67,6 +68,8 @@ func main() {
 
 	subscriptionsRepo := subscriptionsrepo.New(db)
 
+	appHome := apphome.New(slackAPI, twitchAPI, slackRepo, twitchRepo)
+
 	app := application{
 		config: cfg,
 		logger: zerolog.New(os.Stderr).With().Timestamp().Logger(),
@@ -74,10 +77,13 @@ func main() {
 		slackOauth:  slackoauth.New(slackOauthConfig, slackRepo),
 		twitchOauth: twitchoauth.New(twitchOauthConfig, twitchRepo, twitchAPI),
 
-		slackRepo: slackRepo,
-		subsRepo:  subscriptionsRepo,
+		slackRepo:  slackRepo,
+		twitchRepo: twitchRepo,
+		subsRepo:   subscriptionsRepo,
 
 		notifications: notifications.New(slackAPI, slackRepo),
+		appHome:       appHome,
+		twitchAPI:     twitchAPI,
 	}
 
 	err = app.serve()
