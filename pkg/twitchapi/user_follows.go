@@ -1,11 +1,10 @@
 package twitchapi
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"time"
+
+	"github.com/nicklaw5/helix"
 )
 
 type FollowsPayload struct {
@@ -22,32 +21,21 @@ type Follows struct {
 	FollowedAt time.Time `json:"followed_at"`
 }
 
-func (api *API) UserFollows(userID, token string) ([]Follows, error) {
-	url := fmt.Sprintf("%s/users/follows?from_id=%s", api.baseURL, userID)
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+func (api *API) UserFollows(userID, userToken string) ([]helix.UserFollow, error) {
+	client, err := helix.NewClient(&helix.Options{
+		ClientID:        api.clientID,
+		UserAccessToken: userToken,
+	})
+
+	userFollows, err := client.GetUsersFollows(&helix.UsersFollowsParams{FromID: userID})
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Set("Authorization", "Bearer "+token)
-	req.Header.Set("Client-ID", api.clientID)
-
-	res, err := api.client.Do(req)
-	if err != nil {
-		return nil, err
+	if userFollows.Error != "" {
+		return nil, fmt.Errorf("getUsersFollows error: %s", userFollows.Error)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	var payload FollowsPayload
-	err = json.Unmarshal(body, &payload)
-	if err != nil {
-		return nil, err
-	}
-
-	return payload.Data, nil
+	// TODO: consider pagination
+	return userFollows.Data.Follows, nil
 }
