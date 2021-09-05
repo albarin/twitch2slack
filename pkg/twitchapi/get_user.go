@@ -1,10 +1,9 @@
 package twitchapi
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
+
+	"github.com/nicklaw5/helix"
 )
 
 type UserPayload struct {
@@ -15,34 +14,20 @@ type User struct {
 	ID string `json:"id"`
 }
 
-// TODO: use twitch helix lib
+func (api *API) GetUser(userToken string) (*helix.User, error) {
+	client, err := helix.NewClient(&helix.Options{
+		ClientID:        api.clientID,
+		UserAccessToken: userToken,
+	})
 
-func (api *API) GetUser(userToken string) (*User, error) {
-	url := fmt.Sprintf("%s/users", api.baseURL)
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	users, err := client.GetUsers(&helix.UsersParams{})
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Set("Authorization", "Bearer "+userToken)
-	req.Header.Set("Client-ID", api.clientID)
-
-	res, err := api.client.Do(req)
-	if err != nil {
-		return nil, err
+	if users.Error != "" {
+		return nil, fmt.Errorf("getUsersFollows error: %s", users.Error)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	var payload UserPayload
-	err = json.Unmarshal(body, &payload)
-	if err != nil {
-		return nil, err
-	}
-
-	return &payload.Data[0], nil
+	return &users.Data.Users[0], nil
 }
