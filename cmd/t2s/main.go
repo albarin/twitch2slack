@@ -77,13 +77,11 @@ func main() {
 		slackOauth:  slackoauth.New(slackOauthConfig, slackRepo),
 		twitchOauth: twitchoauth.New(twitchOauthConfig, twitchRepo, twitchAPI),
 
-		slackRepo:  slackRepo,
-		twitchRepo: twitchRepo,
-		subsRepo:   subscriptionsRepo,
+		slackRepo: slackRepo,
+		subsRepo:  subscriptionsRepo,
 
 		notifications: notifications.New(slackAPI, slackRepo),
 		appHome:       appHome,
-		twitchAPI:     twitchAPI,
 	}
 
 	err = app.serve()
